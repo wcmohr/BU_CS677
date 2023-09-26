@@ -1,0 +1,1 @@
+[td for td in original_trading_data]
