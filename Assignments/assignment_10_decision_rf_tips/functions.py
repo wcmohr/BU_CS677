@@ -134,3 +134,16 @@ def hyperparameter_grid(stock,year_train,w_array,d_array,test,measure):
 
 def hp_g(a,b):
     return a+b
+
+def data_loading_processing(stock):
+    stock_df = pd.read_csv(f'./Data/{stock}.csv')
+    labels = pd.read_csv(f'./Data/{stock}_labels.csv',header=None)[0]
+    weekly_rv = pd.read_csv(f'./Data/{stock}_weekly_return_volatility.csv')
+    stock_wr = trade_from_close_close(stock_df)
+    stock_wr.loc[:,'Label'] = "NoLabel"
+    # apply labels collected by visual inspection for last two years
+    stock_wr.loc[stock_wr.shape[0] - labels.shape[0]:,'Label'] = labels.values
+    weekly_rv = pd.concat([weekly_rv, pd.Series(np.insert(labels,0,
+                    ['NoLabel']*(weekly_rv.shape[0] - labels.shape[0])),name='Label')], axis=1)
+    all_data = pd.concat([stock_wr,weekly_rv],axis=1)
+    return (weekly_rv,stock_wr,all_data.loc[:,~all_data.columns.duplicated()])
